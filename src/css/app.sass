@@ -1,0 +1,95 @@
+$blue-grey: #F3F5FF
+$blue-grey-text: #A8BAD6
+$blue-hover: #67A5FF
+$light-blue: #8FBCFC
+$grey: #D6D6D6
+$light-dark: #87879D
+$light-dark-2: #676780
+$darker-grey: #A5A5BD
+
+
+.text-grey-blue
+  color: $blue-grey-text
+
+.fs-30
+  font-size: 30px
+  line-height: 42px
+.fs-48
+  font-size: 48px
+  line-height: 67px
+
+.fs-18
+  font-size: 18px
+  line-height: 25px
+.fs-16
+  font-size: 16px
+  line-height: 25px
+.fs-14
+  font-size: 14px
+  line-height: 18px
+.fs-24
+  font-size: 24px
+  line-height: 33px
+.link
+  display: inline-block
+  border-bottom: 1.5px solid $primary
+body
+  font-family: 'Manrope', sans-serif
+  color: $dark
+  overflow-x: hidden
+
+a
+  text-decoration: none
+  color: inherit
+
+.q-field__control
+  border-radius: 15px !important
+  background: #F4F6F9 !important
+  font-size: 16px !important
+.q-field--outlined .q-field__control:before
+  border-color: #F4F6F9 !important
+.q-btn--rounded
+  border-radius: 15px !important
+.q-field--highlighted
+  & .q-field__control
+    background: #fff !important
+
+.container
+  max-width: 1740px
+  padding: 0 10px
+  margin: 0 auto
+.q-menu
+  background: #FFFFFF
+  box-shadow: 0px 14px 80px rgba(0, 0, 0, 0.1)
+  border-radius: 15px
+.q-item__section
+  font-size: 16px
+  font-weight: 500
+  color: #87879D
+  cursor: pointer
+  &:hover
+    color: $dark
+
+.new-project
+  display: inline-flex
+  padding: 15px 35px
+  border: 4px solid #F3F5FF
+  box-sizing: border-box
+  filter: drop-shadow(0px 14px 80px rgba(0, 0, 0, 0.05))
+  border-radius: 30px
+
+  min-width: 100%
+  cursor: pointer
+  transition: background-color .2s linear
+  height: fit-content
+  &:hover
+    background: #F3F5FF
+  &.newProjectActive
+    background: #ffffff
+    cursor: unset
+    padding: 30px 20px
+    display: inline-block
+    box-shadow: 0px 14px 80px rgba(0, 0, 0, 0.05)
+    border-color: #ffffff
+    &:hover
+      background: #ffffff

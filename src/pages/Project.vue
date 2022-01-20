@@ -1,11 +1,11 @@
 <template>
-  <q-page class="q-mt-xl">
-    {{taskData.dead_line}}
+  <q-page class="">
+
     <div class="flex items-center q-mb-xl">
       <q-btn @click="$router.back()" icon="west" size="18px" class="q-mr-lg" round unelevated text-color="accent" color="grey-3"/>
       <p class="q-mb-none q-mr-xl fs-48 text-weight-bold">{{project.name}}</p>
       <div class="">
-        <q-btn class="q-mr-md" icon="add_link"  size="16px" round unelevated text-color="accent" color="grey-3"/>
+        <q-btn v-if="$auth.user.is_superuser" class="q-mr-md" icon="add_link"  size="16px" round unelevated text-color="accent" color="grey-3"/>
         <q-popup-edit ref="addlink" v-model="new_link" auto-save v-slot="scope">
           <q-input class="q-mb-sm" rounded outlined v-model="newLink.name" dense autofocus label="Название" />
           <q-input class="q-mb-sm" rounded outlined v-model="newLink.link" dense autofocus label="Ссылка" />
@@ -23,11 +23,12 @@
              target="_blank"
              :key="link.id"
              class="q-mr-md project-link" icon-right="link" no-caps size="14px" rounded unelevated text-color="accent" color="grey-3">
-<q-badge @click.prevent="delLink(link.id)" floating color="negative"><q-icon size="10px" name="close"/></q-badge>
+<q-badge v-if="$auth.user.is_superuser" @click.prevent="delLink(link.id)" floating color="negative"><q-icon size="10px" name="close"/></q-badge>
       </q-btn>
 
     </div>
     <div class="project-grid">
+
       <div class="project-column" :id="`column-${column_index}`" v-for="(column,column_index) in project.columns" :key="column_index"
            @drop='columnOnDrop($event, "tasks")'
            @dragover="columnDragOver"
@@ -38,8 +39,8 @@
              @keyup="columnNameInput"
              :id="`column${column_index}`"
              :ref="`column${column_index}`"
-             :contenteditable="edit_column_name_index===column_index">{{column.id}} {{column.name}}</p>
-          <q-btn color="white"  text-color="grey-3" round flat >
+             :contenteditable="edit_column_name_index===column_index">{{column.name}}</p>
+          <q-btn v-if="$auth.user.is_superuser" color="white"  text-color="grey-3" round flat >
             <svg width="30" height="7" viewBox="0 0 30 7" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="3" cy="3.5" r="3" fill="#D6D6D6"/>
               <circle cx="15" cy="3.5" r="3" fill="#D6D6D6"/>
@@ -52,7 +53,7 @@
                 </q-item>
                 <q-separator/>
                 <q-item class="text-negative" clickable @click="deleteColumn(column.id)">
-                  <q-item-section class="text-negative">Удалить колонку</q-item-section>
+                  <q-item-section  class="text-negative">Удалить колонку</q-item-section>
                 </q-item>
 
 
@@ -60,7 +61,7 @@
             </q-menu>
           </q-btn>
         </div>
-        <div class="new-project q-mb-lg"
+        <div v-if="$auth.user.is_superuser" class="new-project q-mb-lg"
              @click="column_id_to_add_task = column.id,newTaskModal = !newTaskModal"
              @dragover.prevent
              @dragenter.prevent>
@@ -68,16 +69,18 @@
           <p  class="text-accent fs-18 text-weight-medium no-margin full-width">Новая задача</p>
         </div>
         <div class="tasks">
-          <div   class="task-wrapper" :ref="`task-item-${task.uid}`"
-
+          <div   class="task-wrapper relative-position" :ref="`task-item-${task.uid}`"
                  v-for="(task,task_index) in column.tasks"
                  :key="task_index"
                  draggable="true"
                  @dragstart="taskDragStart($event,column_index,task_index, task)">
+             <q-badge v-if="task.is_proger_task" :color="task.is_new ? 'red' : 'primary'" floating :label="task.is_new ? 'Новая задача прогеру' : 'Задача прогеру'"/>
+             <q-badge v-if="task.is_designer_task" :color="task.is_new ? 'red' : 'primary'" floating :label="task.is_new ? 'Новая задача дизайнеру' : 'Задача дизайнеру'"/>
+
             <div class="task" :class="{'is-done':task.is_done}" :id="`task-${task_index}`">
               <div class="task-inner">
                 <div class="flex items-center justify-between q-mb-md">
-                  <q-chip color="primary" class="q-pt-xs" size="14px" text-color="white" >{{task.tag.name}}</q-chip>
+                  <q-chip :color="task.tag.color" class="q-pt-xs" size="14px" text-color="white" >{{task.tag.name}}</q-chip>
                   <q-btn color="white"  text-color="grey-3" round flat >
                     <svg width="30" height="7" viewBox="0 0 30 7" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <circle cx="3" cy="3.5" r="3" fill="#D6D6D6"/>
@@ -90,14 +93,14 @@
                         <q-item clickable @click="currentTask=task, taskInfoModal=true">
                           <q-item-section>Открыть задачу</q-item-section>
                         </q-item>
-                        <q-item clickable @click="editTask(task)">
+                        <q-item v-if="$auth.user.is_superuser" clickable @click="editTask(task)">
                           <q-item-section>Редактировать задачу</q-item-section>
                         </q-item>
                         <q-item clickable @click="taskDone(task)">
                           <q-item-section class="text-positive">Задача выполнена</q-item-section>
                         </q-item>
-                        <q-separator/>
-                        <q-item clickable @click="deleteTask(task.id,column_index,task_index)">
+                        <q-separator v-if="$auth.user.is_superuser" />
+                        <q-item v-if="$auth.user.is_superuser" clickable @click="deleteTask(task.id,column_index,task_index)">
                           <q-item-section class="text-negative">Удалить задачу</q-item-section>
                         </q-item>
 
@@ -131,10 +134,11 @@
           </div>
         </div>
       </div>
-      <div class="new-project" @click="addColumn">
+      <div v-if="$auth.user.is_superuser" class="new-project" @click="addColumn">
         <q-icon class="q-mr-md" name="add"  color="accent" size="24px"/>
         <p  class="text-accent fs-18 text-weight-medium no-margin full-width">Новая колонка</p>
       </div>
+
     </div>
   </q-page>
   <q-dialog v-model="newTaskModal">
@@ -147,11 +151,17 @@
 
       <q-card-section class="no-padding">
         <q-form @submit.prevent="newTaskFormSubmit">
+          <div class="q-mb-sm tag-select">
+            <p class="q-mb-sm">Задача для</p>
+          <q-checkbox v-model="taskData.is_proger" label="Прогера" />
+          <q-checkbox v-model="taskData.is_designer" label="Дизайнера" />
+          </div>
+
           <q-input class="q-mb-sm" rounded outlined  v-model="taskData.name" label="Название задачи" />
           <q-input class="q-mb-sm" type="textarea" rounded outlined  v-model="taskData.description" label="Описание задачи" />
           <div class="flex items-center tag-select q-mb-sm">
             <p class="q-mb-none q-mr-sm fs-16 text-grey-7">Теги:</p>
-            <q-btn :color="taskData.tag.id === tag.id ? 'primary' : 'blue-3'"
+            <q-btn :color="taskData.tag.id === tag.id ? tag.color : `${tag.color}-3`"
                    class="q-pt-xs q-mr-sm"
                    size="14px"
                    text-color="white"
@@ -220,7 +230,7 @@
 
     </q-card>
   </q-dialog>
-  <q-dialog v-model="taskInfoModal">
+  <q-dialog v-model="taskInfoModal" @before-show="taskOpen">
     <q-card class="task bg-white" style="width: 400px; max-width: 100vw;">
       <q-card-section class="row items-center no-padding q-mb-md">
         <div class="text-h6">Детали задачи</div>
@@ -231,7 +241,7 @@
         <div class="task q-mb-md">
           <div class="flex items-center justify-between q-mb-md">
             <q-chip color="primary" class="q-pt-xs" size="14px" text-color="white" >{{currentTask.tag.name}}</q-chip>
-            <q-btn color="white"  text-color="grey-3" round flat >
+            <q-btn v-if="$auth.user.is_superuser" color="white"  text-color="grey-3" round flat >
               <svg width="30" height="7" viewBox="0 0 30 7" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="3" cy="3.5" r="3" fill="#D6D6D6"/>
                 <circle cx="15" cy="3.5" r="3" fill="#D6D6D6"/>
@@ -338,6 +348,8 @@ export default {
         description:null,
         tag:null,
         dead_line:null,
+        is_proger:true,
+        is_designer:false
       },
       file_to_add:{
         name:null,
@@ -362,6 +374,19 @@ export default {
 
   },
   methods:{
+    async taskOpen(){
+
+      if(this.$auth.user.is_proger && this.currentTask.is_proger_task){
+        await this.$api.post(`/api/data/task_view`,{id:this.currentTask.id})
+        this.currentTask.is_new = false
+      }
+
+      if(this.$auth.user.is_desiner && this.currentTask.is_designer_task){
+        await this.$api.post(`/api/data/task_view`,{id:this.currentTask.id})
+        this.currentTask.is_new = false
+      }
+
+    },
     async inputHandler(val){
       if (val.keyCode===13){
 
@@ -430,6 +455,7 @@ export default {
       this.is_loading = !this.is_loading
       let formData = new FormData()
       formData.set('c_id',this.column_id_to_add_task)
+      formData.set('p_id',this.project.id)
       formData.set('data',JSON.stringify(this.taskData))
       if(this.taskFiles.length>0){
         for(let i of this.taskFiles){
@@ -574,10 +600,13 @@ export default {
   grid-auto-columns: 400px
   grid-auto-flow: column
   grid-gap: 40px
-  overflow: scroll
+  overflow-y: hidden
   margin: 0 -90px
   padding: 0 90px
-  min-height: 100%
+  min-height: 79vh
+  height: fit-content
+
+
 
 
 .project-column

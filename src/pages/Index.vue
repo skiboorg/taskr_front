@@ -1,10 +1,11 @@
 <template>
-  <q-page class="q-mt-xl">
+  <q-page class="">
     <p class="q-mb-lx fs-48 text-weight-bold">Проекты</p>
 
     <p v-if="projects.length===0" class="text-accent fs-24 text-weight-medium">Проектов пока нет. Создайте проект для начала работы</p>
     <div class="projects-grid">
-      <div class="project"  v-for="project in projects" :key="project.id">
+      <div class="project relative-position"  v-for="project in projects" :key="project.id">
+
         <q-img
           @click="$router.push(`/projects/${project.name_slug}`)"
           :src="project.image_mob"
@@ -14,27 +15,32 @@
         />
         <div class="flex items-center justify-between">
           <p class="no-margin text-weight-medium fs-18 cursor-pointer" @click="$router.push(`/projects/${project.name_slug}`)">{{project.name}}</p>
-          <q-btn color="white"  text-color="grey-3" round flat >
-            <svg width="30" height="7" viewBox="0 0 30 7" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="3" cy="3.5" r="3" fill="#D6D6D6"/>
-              <circle cx="15" cy="3.5" r="3" fill="#D6D6D6"/>
-              <circle cx="27" cy="3.5" r="3" fill="#D6D6D6"/>
-            </svg>
+          <div class="flex column">
+            <q-badge v-if="project.is_have_new_proger_task" class="q-mb-sm" label="Новые задачи прогеру"/>
+            <q-badge v-if="project.is_have_new_designer_task"  label="Новые задачи дизайнеру"/>
+          </div>
 
-            <q-menu auto-close :offset="[100, 10]">
-              <q-list style="min-width: 100px">
-                <q-item clickable @click="deleteProject(project.id)">
-                  <q-item-section>Удалить</q-item-section>
-                </q-item>
+<!--          <q-btn color="white"  text-color="grey-3" round flat >-->
+<!--            <svg width="30" height="7" viewBox="0 0 30 7" fill="none" xmlns="http://www.w3.org/2000/svg">-->
+<!--              <circle cx="3" cy="3.5" r="3" fill="#D6D6D6"/>-->
+<!--              <circle cx="15" cy="3.5" r="3" fill="#D6D6D6"/>-->
+<!--              <circle cx="27" cy="3.5" r="3" fill="#D6D6D6"/>-->
+<!--            </svg>-->
+
+<!--            <q-menu auto-close :offset="[100, 10]">-->
+<!--              <q-list style="min-width: 100px">-->
+<!--                <q-item clickable @click="deleteProject(project.id)">-->
+<!--                  <q-item-section>Удалить</q-item-section>-->
+<!--                </q-item>-->
 
 
 
-              </q-list>
-            </q-menu>
-          </q-btn>
+<!--              </q-list>-->
+<!--            </q-menu>-->
+<!--          </q-btn>-->
         </div>
       </div>
-      <div class="new-project" :class="{'newProjectActive' : newProjectActive}" >
+      <div v-if="$auth.user.is_superuser" class="new-project" :class="{'newProjectActive' : newProjectActive}" >
         <q-icon v-if="!newProjectActive" class="q-mr-md" name="add" @click="newProjectActive=true" color="accent" size="24px"/>
         <p v-if="!newProjectActive" @click="newProjectActive=true" class="text-accent fs-18 text-weight-medium no-margin full-width">Новый проект</p>
         <q-form v-if="newProjectActive">

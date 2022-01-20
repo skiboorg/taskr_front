@@ -1,6 +1,6 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header class="header 2 q-py-md">
+    <q-header style="position: absolute" class="header 2 q-py-md">
       <div class="container">
           <q-toolbar class="flex items-center justify-between no-padding">
         <q-avatar rounded size="56px">
@@ -8,7 +8,7 @@
         </q-avatar>
 
             <div class="flex items-center justify-between">
-              <p class="q-mb-none q-mr-lg text-dark fs-16">Lorem ipsum.</p>
+              <p class="q-mb-none q-mr-lg text-dark fs-16">{{$auth.user.fio}}</p>
               <q-btn label="Выйти" class="text-weight-bold q-px-lg " size="18px" no-caps unelevated rounded text-color="primary" color="grey-3"/>
             </div>
 

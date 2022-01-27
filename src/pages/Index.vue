@@ -1,10 +1,30 @@
 <template>
   <q-page class="">
-    <p class="q-mb-lx fs-48 text-weight-bold">Проекты</p>
+    <div class="flex items-center q-mb-lx">
+       <p class=" fs-48 text-weight-bold q-mr-xl">Проекты</p>
+      <div class="">
+          <q-chip v-for="(status,index) in statuses" :key="index" class="bg-grey-2">
+
+        <q-avatar >
+          <img :src="status.icon">
+        </q-avatar>
+        {{status.name}}
+      </q-chip>
+      </div>
+    </div>
+
 
     <p v-if="projects.length===0" class="text-accent fs-24 text-weight-medium">Проектов пока нет. Создайте проект для начала работы</p>
     <div class="projects-grid">
-      <div class="project relative-position"  v-for="project in projects" :key="project.id">
+      <div class="project relative-position" @click="cur_proj=project.id" v-for="project in projects" :key="project.id">
+
+        <div v-if="project.statuses.length > 0" class="flex items-center justify-end q-mb-md">
+          <div class="status" v-for="(status,index) in project.statuses" :key="index">
+
+            <img :src="statuses.find(x=>x.id===status).icon" alt="">
+
+          </div>
+        </div>
 
         <q-img
           @click="$router.push(`/projects/${project.name_slug}`)"
@@ -13,32 +33,36 @@
           style="height: 188px; max-width: 100%;border-radius: 15px;"
           class="q-mb-md cursor-pointer"
         />
-        <div class="flex items-center justify-between">
-          <p class="no-margin text-weight-medium fs-18 cursor-pointer" @click="$router.push(`/projects/${project.name_slug}`)">{{project.name}}</p>
-          <div class="flex column">
+         <div class="flex column items-end">
             <q-badge v-if="project.is_have_new_proger_task" class="q-mb-sm" label="Новые задачи прогеру"/>
             <q-badge v-if="project.is_have_new_designer_task"  label="Новые задачи дизайнеру"/>
           </div>
+        <div class="flex items-center justify-between">
+          <p class="no-margin text-weight-medium fs-18 cursor-pointer" @click="$router.push(`/projects/${project.name_slug}`)">{{project.name}}</p>
 
-<!--          <q-btn color="white"  text-color="grey-3" round flat >-->
-<!--            <svg width="30" height="7" viewBox="0 0 30 7" fill="none" xmlns="http://www.w3.org/2000/svg">-->
-<!--              <circle cx="3" cy="3.5" r="3" fill="#D6D6D6"/>-->
-<!--              <circle cx="15" cy="3.5" r="3" fill="#D6D6D6"/>-->
-<!--              <circle cx="27" cy="3.5" r="3" fill="#D6D6D6"/>-->
-<!--            </svg>-->
+          <q-btn color="white"  text-color="grey-3" round flat >
+            <svg width="30" height="7" viewBox="0 0 30 7" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="3" cy="3.5" r="3" fill="#D6D6D6"/>
+              <circle cx="15" cy="3.5" r="3" fill="#D6D6D6"/>
+              <circle cx="27" cy="3.5" r="3" fill="#D6D6D6"/>
+            </svg>
 
-<!--            <q-menu auto-close :offset="[100, 10]">-->
-<!--              <q-list style="min-width: 100px">-->
+            <q-menu auto-close :offset="[0, 0]">
+              <q-list style="min-width: 100px">
+                <q-item dense v-for="(status,index) in statuses" :key="index">
+                  <q-toggle dense color="blue" @click="statusChange(project.id,project.statuses)" :label="status.name"
+                            v-model="project.statuses" :val="status.id" />
+                </q-item>
+
 <!--                <q-item clickable @click="deleteProject(project.id)">-->
 <!--                  <q-item-section>Удалить</q-item-section>-->
 <!--                </q-item>-->
-
-
-
-<!--              </q-list>-->
-<!--            </q-menu>-->
-<!--          </q-btn>-->
+              </q-list>
+            </q-menu>
+          </q-btn>
         </div>
+
+
       </div>
       <div v-if="$auth.user.is_superuser" class="new-project" :class="{'newProjectActive' : newProjectActive}" >
         <q-icon v-if="!newProjectActive" class="q-mr-md" name="add" @click="newProjectActive=true" color="accent" size="24px"/>
@@ -80,24 +104,39 @@ export default {
       newProjectActive:false,
       is_loading:false,
       imageUrl:null,
+      selected_statuses:[],
+      cur_proj:0,
       newProjectData:{
         title:null,
         file:null
       },
-      projects:[]
+      projects:[],
+      statuses:[]
     }
   },
   async beforeMount(){
+    const response =await this.$api.get('/api/data/statuses')
+    this.statuses = response.data
     await this.getProjects()
+
   },
   watch:{
     'newProjectData.file'(val){
       val !==null ?
         this.imageUrl = URL.createObjectURL(this.newProjectData.file) :
         this.imageUrl = null
+    },
+    async selected_statuses(){
+       await this.$api.post('/api/data/project_status',{id:this.cur_proj,statuses:this.selected_statuses})
+      await this.getProjects()
     }
+
   },
   methods:{
+    async statusChange(id,statuses){
+      console.log(statuses)
+      await this.$api.post('/api/data/project_status',{id,statuses})
+    },
     updateFile(){
       console.log(this.newProjectData.file)
       this.imageUrl = URL.createObjectURL(this.newProjectData.file.value)
@@ -148,6 +187,9 @@ export default {
   display: grid
   grid-template-columns: repeat(auto-fill,minmax(375px,1fr))
   grid-gap: 40px
-
+.status
+  margin-right: 10px
+  &:last-child
+    margin-right: 0
 
 </style>

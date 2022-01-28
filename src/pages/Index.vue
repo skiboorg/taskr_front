@@ -2,14 +2,14 @@
   <q-page class="">
     <div class="flex items-center q-mb-lx">
        <p class=" fs-48 text-weight-bold q-mr-xl">Проекты</p>
-      <div class="">
-          <q-chip v-for="(status,index) in statuses" :key="index" class="bg-grey-2">
+      <div class="flex items-center">
+          <div style="border-radius: 30px" v-for="(status,index) in statuses" :key="index" class="bg-grey-2 flex items-center q-mr-md q-py-sm q-px-md">
+<span class="q-mr-md text-weight-medium " :class="`text-${status.color}`" >{{status.name}}</span>
 
-        <q-avatar >
           <img :src="status.icon">
-        </q-avatar>
-        {{status.name}}
-      </q-chip>
+
+
+      </div>
       </div>
     </div>
 
